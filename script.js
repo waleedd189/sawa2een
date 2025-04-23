@@ -1,25 +1,32 @@
 
 const password = "123456";
-const driverData = {
-  "101": { "يوريا": 11, "فحم لافارج": 15 },
-  "102": { "يوريا": 8, "فحم لافارج": 19 }
-};
-
 function login() {
-  const code = document.getElementById("driverCode").value;
-  const pass = document.getElementById("password").value;
-  if (pass === password && driverData[code]) {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("data-screen").style.display = "block";
-    const tbody = document.querySelector("#projectsTable tbody");
-    tbody.innerHTML = "";
-    Object.entries(driverData[code]).forEach(([project, count]) => {
-      const row = `<tr><td>${project}</td><td>${count}</td></tr>`;
-      tbody.innerHTML += row;
-    });
-  } else {
-    alert("كود غير صحيح أو كلمة مرور خاطئة");
+  const code = document.getElementById("driverCode").value.trim();
+  const pass = document.getElementById("password").value.trim();
+
+  if (pass !== password) {
+    alert("كلمة مرور خاطئة");
+    return;
   }
+
+  fetch("https://script.google.com/macros/s/AKfycbxL0hGtrOryVT9kt19sU3g5bEugfvqVNvmWz-8mFee8vAQRQzBU9-BFO5jt9NCa1uwJ/exec")
+    .then(res => res.json())
+    .then(data => {
+      const rows = data.filter(row => row["كود السائق"] == code);
+      if (rows.length === 0) {
+        alert("كود غير موجود");
+        return;
+      }
+
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("data-screen").style.display = "block";
+
+      const tbody = document.querySelector("#projectsTable tbody");
+      tbody.innerHTML = "";
+      rows.forEach(row => {
+        tbody.innerHTML += `<tr><td>${row["اسم المشروع"]}</td><td>${row["عدد النقلات"]}</td></tr>`;
+      });
+    });
 }
 
 function logout() {
